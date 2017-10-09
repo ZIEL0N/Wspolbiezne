@@ -1,7 +1,18 @@
 #include <windows.h>
 #include <time.h>
+#include <iostream>
+#include <string>
+
+#define sto  (100)
+#define dwo (200)
+
+void OurFunction();
+
+static bool nieidzdalej=true;
 static HINSTANCE        hInstApp;
 static HWND             hwndApp;
+static HWND             hwndButton;
+static HWND             hwndButton2;
 char   szAppName[]="Problem producenta - konsumenta.";
 static HANDLE           theElementy;
 static HANDLE           theMiejsca;
@@ -47,11 +58,8 @@ void DrawWindow()
         HBRUSH theBlueBrush     = CreateSolidBrush(RGB(50,50,150));
         SetTextColor(theDC,RGB(0,0,0));
         SetBkMode(theDC,TRANSPARENT);
-        TextOut(theDC,135,20,"Bufor:",6);
-        TextOut(theDC,45,90,"Problem producenta-konsumenta.",30);
 
         int moveHor = 320, moveVer =0;
-        bool a,b,c,d;
         for(int i = 0;i < N;i++)
         {
             moveVer += 20;
@@ -63,9 +71,6 @@ void DrawWindow()
                 theRect.right   = 10+ j*20 + moveHor;
                 theRect.top     = 50 + moveVer;
                 theRect.bottom  = 65 + moveVer;
-
-
-
 
                 if (bufor[i])
                         FillRect(theDC,&theRect,theBlueBrush);
@@ -81,6 +86,14 @@ LONG CALLBACK AppWndProc(HWND hwnd,UINT msg,WPARAM wParam,LPARAM lParam)
 {
   switch (msg)
   {
+  case WM_COMMAND:
+      if(LOWORD(wParam)==dwo) {
+            LPSTR jakisText;
+            GetWindowText(hwndButton,jakisText,3);
+            N= std::stoi(jakisText);
+            OurFunction();
+      }
+    break;
 case WM_KILLFOCUS:
 break;
 case WM_SETFOCUS:
@@ -89,7 +102,9 @@ break;
 PostQuitMessage(0);
               break;
 case WM_PAINT:
+    if(!nieidzdalej) {
                 DrawWindow();
+    }
 break;
 case WM_DESTROY:
                 CloseHandle(theElementy);
@@ -132,19 +147,33 @@ BOOL AppInit(HINSTANCE hInst,HINSTANCE hPrev,int sw,LPSTR szCmdLine)
   ((rek.right - rek.left) - 320)/2,((rek.bottom - rek.top) - 160)/2,
   640,320,0,0,hInst,0);
   ShowWindow(hwndApp,SW_SHOW);
-  // Tworzymy bufor.
-  bufor = new char[N];
-  for(int i = 0;i < N;i++) bufor[i] = 0;
-  // Tworzymy semafory.
-  theElementy   = CreateSemaphore(NULL,0,N,NULL);
-  theMiejsca    = CreateSemaphore(NULL,N,N,NULL);
-  // Tworzymy watki.
-  DWORD ID;
-  theProducent  = CreateThread(NULL,0,Producent,0,0,&ID);
-  theKonsument  = CreateThread(NULL,0,Konsument,0,0,&ID);
-  // Inicjacja generatora losowego.
-  time_t t;
-  srand((unsigned) time(&t));
+
+    hwndButton = CreateWindow(
+            "EDIT",  // Predefined class; Unicode assumed
+            "",      // Button text
+            WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,  // Styles
+            10,         // x position
+            10,         // y position
+            100,        // Button width
+            20,        // Button height
+            hwndApp,     // Parent window
+            NULL,       // No menu.
+            (HINSTANCE)GetWindowLong(hwndApp, GWL_HINSTANCE),
+            NULL);      // Pointer not needed.
+
+    hwndButton2 = CreateWindow(
+            "BUTTON",  // Predefined class; Unicode assumed
+            "",      // Button text
+            WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,  // Styles
+            110,         // x position
+            10,         // y position
+            100,        // Button width
+            20,        // Button height
+            hwndApp,     // Parent window
+            (HMENU)dwo,       // No menu.
+            (HINSTANCE)GetWindowLong(hwndApp, GWL_HINSTANCE),
+            NULL);      // Pointer not needed.
+
   return TRUE;
 }
 int PASCAL WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR szCmdLine, int sw)
@@ -171,4 +200,21 @@ int PASCAL WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR szCmdLine, int sw)
     }
   }
   return msg.wParam;
+}
+
+void OurFunction() {
+  // Tworzymy bufor.
+  bufor = new char[N];
+  for(int i = 0;i < N;i++) bufor[i] = 0;
+  // Tworzymy semafory.
+  theElementy   = CreateSemaphore(NULL,0,N,NULL);
+  theMiejsca    = CreateSemaphore(NULL,N,N,NULL);
+  // Tworzymy watki.
+  DWORD ID;
+  theProducent  = CreateThread(NULL,0,Producent,0,0,&ID);
+  theKonsument  = CreateThread(NULL,0,Konsument,0,0,&ID);
+  // Inicjacja generatora losowego.
+  time_t t;
+  srand((unsigned) time(&t));
+  nieidzdalej = true;
 }
