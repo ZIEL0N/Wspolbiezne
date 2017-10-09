@@ -49,32 +49,18 @@ void DrawWindow()
         SetBkMode(theDC,TRANSPARENT);
         TextOut(theDC,135,20,"Bufor:",6);
         TextOut(theDC,45,90,"Problem producenta-konsumenta.",30);
+
+        int moveHor = 320, moveVer =0;
+        bool a,b,c,d;
         for(int i = 0;i < N;i++)
         {
-            int moveHor =0, moveVer =0;
+            moveVer += 20;
+            moveHor = 320 - 20*i/2;
+            for(int j=0;j<i;j++){
 
-                if(i>0){
-                    moveHor -= i*(300/N)/2;
-                    moveVer += 20;
-                }
-                if(i>2){
-                    moveHor -= i*(300/N)/2;
-                    moveVer += 20;
-
-                }
-                if(i>5){
-                    moveHor -= i*(300/N);
-                    moveVer += 20;
-
-                }
-                if(i>9){
-                    moveHor -= i*(300/N);
-                    moveVer += 20;
-
-                }
                 RECT theRect;
-                theRect.left    = 9 + i*(300 / N) + moveHor;
-                theRect.right   = 7 + (i + 1)*(300 / N) + moveHor;
+                theRect.left    = j*20 +  moveHor;
+                theRect.right   = 10+ j*20 + moveHor;
                 theRect.top     = 50 + moveVer;
                 theRect.bottom  = 65 + moveVer;
 
@@ -85,7 +71,8 @@ void DrawWindow()
                         FillRect(theDC,&theRect,theBlueBrush);
                 else
                         FillRect(theDC,&theRect,theWhiteBrush);
-        };
+            }
+        }
         DeleteObject((HBRUSH)theWhiteBrush);
         DeleteObject((HBRUSH)theBlueBrush);
         ReleaseDC(hwndApp,theDC);
