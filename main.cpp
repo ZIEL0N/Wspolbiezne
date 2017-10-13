@@ -7,6 +7,7 @@
 #define dwo (200)
 
 void OurFunction();
+DWORD WINAPI LiczenieNaWatkach(LPVOID);
 
 static bool nieidzdalej=true;
 static HINSTANCE        hInstApp;
@@ -16,12 +17,46 @@ static HWND             hwndButton2;
 char   szAppName[]="Problem producenta - konsumenta.";
 static HANDLE           theElementy;
 static HANDLE           theMiejsca;
+static HANDLE           Semafor;
 static HANDLE           theProducent;
 static HANDLE           theKonsument;
+static HANDLE*         tablicaWatkow;
 static int              we_indeks       = 0;
 static int              wy_indeks       = 0;
 static int              N               = 15;
 static char*            bufor           = NULL;
+static int**            trojkat;
+static int*             Argumentl
+
+void UzupelnijTrojkatPascala(){
+  for (int i=0;i<N;i++){
+        for(int j=0;j<i;j++){
+            if(!(j==0||j==i-1)&&i>1){
+                trojkat[i][j]=trojkat[i-1][j-1]+trojkat[i-1][j];
+            }
+            std::cout<<trojkat[i][j]<<' ';
+        }
+        std::cout<<'\n';
+  }
+}
+
+void StworzSemafor() {
+    Semafor = CreateSemaphore(NULL,0,1,NULL);
+    int iloscWatkow = 0;
+    for(int i=1;i<=N-2;i++) {
+        iloscWatkow += i;
+    }
+    tablicaWatkow = new HANDLE[iloscWatkow];
+    for(int i=0;i<iloscWatkow;i++) {
+        tablicaWatkow[i] = CreateThread(NULL,0,LiczenieNaWatkach,0,0, NULL);
+    }
+}
+
+DWORD WINAPI LiczenieNaWatkach(LPVOID) {
+
+}
+
+
 //----------------------------------------------------------------------
 DWORD WINAPI Producent(LPVOID)
 {
@@ -88,9 +123,10 @@ LONG CALLBACK AppWndProc(HWND hwnd,UINT msg,WPARAM wParam,LPARAM lParam)
   {
   case WM_COMMAND:
       if(LOWORD(wParam)==dwo) {
+            std::cout<<"no";
             LPSTR jakisText;
             GetWindowText(hwndButton,jakisText,3);
-            N= std::stoi(jakisText);
+            N = 5;
             OurFunction();
       }
     break;
@@ -203,6 +239,7 @@ int PASCAL WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR szCmdLine, int sw)
 }
 
 void OurFunction() {
+  nieidzdalej = true;
   // Tworzymy bufor.
   bufor = new char[N];
   for(int i = 0;i < N;i++) bufor[i] = 0;
@@ -216,5 +253,20 @@ void OurFunction() {
   // Inicjacja generatora losowego.
   time_t t;
   srand((unsigned) time(&t));
-  nieidzdalej = true;
+
+  trojkat = new int* [N];
+  for (int i=0;i<N;i++){
+        trojkat[i]=new int[i+1];
+        for(int j=0;j<i;j++){
+            if(j==0||j==i-1) trojkat[i][j]=1;
+        }
+  }
+
+  UzupelnijTrojkatPascala();
+
+  if(N>1) {
+    StworzSemafor();
+  }
+
 }
+

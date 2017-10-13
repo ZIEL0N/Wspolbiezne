@@ -1,5 +1,7 @@
 # depslib dependency file v1.0
-1507562416 source:c:\users\whigle\documents\wspolbiezne\main.cpp
+1507905599 source:d:\marcin\dokumenty\studia\wspó³bie¿ne\trunk\main.cpp
 	<windows.h>
 	<time.h>
+	<iostream>
+	<string>
 
