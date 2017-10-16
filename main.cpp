@@ -23,68 +23,103 @@ static HANDLE           theKonsument;
 static HANDLE*         tablicaWatkow;
 static int              we_indeks       = 0;
 static int              wy_indeks       = 0;
-static int              N               = 15;
+static int              N               = 20;
 static char*            bufor           = NULL;
 static int**            trojkat;
-static int*             Argumentl
+static int*             Argument1;
 
-void UzupelnijTrojkatPascala(){
-  for (int i=0;i<N;i++){
-        for(int j=0;j<i;j++){
-            if(!(j==0||j==i-1)&&i>1){
-                trojkat[i][j]=trojkat[i-1][j-1]+trojkat[i-1][j];
+struct Index{
+    public:
+        int i;
+        int j;
+        int value=-1;
+
+        Index(){
+            this->i=0;
+            this->j=0;
+        }
+        Index(int i, int j){
+            this->i=i;
+            this->j=j;
+        }
+};
+
+static Index**           trojkatNaWatkach;
+static HANDLE**           trojkatSemaforow;
+static HANDLE**           trojkatWatkow;
+
+static HANDLE           watekPrintu;
+
+void Clear(){
+    if(trojkatWatkow!=NULL && trojkatSemaforow!=NULL){
+        for(int i=0;i<N;i++){
+            for(int j=0;j<i;j++){
+                CloseHandle(trojkatSemaforow[i][j]);
+                TerminateThread(trojkatWatkow[i][j],0);
+                CloseHandle(trojkatWatkow[i][j]);
             }
-            std::cout<<trojkat[i][j]<<' ';
+        }
+    }
+    TerminateThread(watekPrintu,0);
+    CloseHandle(watekPrintu);
+}
+
+DWORD WINAPI PrintTrojkat(LPVOID o){
+    int suma=0;
+    for(int i=0;i<N;i++){
+        for(int j=0;j<=i;j++){
+                suma++;
+            }
+    }
+    WaitForMultipleObjects(suma,*trojkatSemaforow,true,500);
+    for(int i=0;i<N;i++){
+        for(int j=0;j<=i;j++){
+            std::cout<<trojkatNaWatkach[i][j].value<<' ';
         }
         std::cout<<'\n';
+    }
+}
+
+void UzupelnijTrojkatPascalaNaWatkach(){
+  watekPrintu = CreateThread(NULL,0,PrintTrojkat,NULL,0, NULL);
+  for (int i=0;i<N;i++){
+        for(int j=0;j<=i;j++){
+            trojkatSemaforow[i][j] = CreateSemaphore(NULL,0,2,NULL);
+            if(i==0||j==i||j==0) ReleaseSemaphore(trojkatSemaforow[i][j],2,NULL);
+            else trojkatWatkow[i][j]=CreateThread(NULL,0,LiczenieNaWatkach,&trojkatNaWatkach[i][j],0, NULL);
+        }
   }
 }
 
-void StworzSemafor() {
-    Semafor = CreateSemaphore(NULL,0,1,NULL);
-    int iloscWatkow = 0;
-    for(int i=1;i<=N-2;i++) {
-        iloscWatkow += i;
-    }
-    tablicaWatkow = new HANDLE[iloscWatkow];
-    for(int i=0;i<iloscWatkow;i++) {
-        tablicaWatkow[i] = CreateThread(NULL,0,LiczenieNaWatkach,0,0, NULL);
-    }
+
+DWORD WINAPI LiczenieNaWatkach(LPVOID o) {
+    Index *ind = (struct Index *)o;
+    WaitForSingleObject(trojkatSemaforow[ind->i-1][ind->j-1], INFINITE);
+    WaitForSingleObject(trojkatSemaforow[ind->i-1][ind->j], INFINITE);
+    ind->value= trojkatNaWatkach[ind->i-1][ind->j-1].value + trojkatNaWatkach[ind->i-1][ind->j].value;
+
+    ReleaseSemaphore(trojkatSemaforow[ind->i][ind->j],2,NULL);
 }
 
-DWORD WINAPI LiczenieNaWatkach(LPVOID) {
+void OurFunction() {
+  nieidzdalej = true;
+  trojkatNaWatkach = new Index* [N];
+  trojkatSemaforow = new HANDLE* [N];
+  trojkatWatkow = new HANDLE* [N];
+  for (int i=0;i<N;i++){
+        trojkatNaWatkach[i]=new Index[i+1];
+        trojkatSemaforow[i]=new HANDLE[i+1];
+        trojkatWatkow[i]=new HANDLE[i+1];
+        for(int j=0;j<=i;j++){
+            trojkatNaWatkach[i][j].i=i;
+            trojkatNaWatkach[i][j].j=j;
+            if(i==0||j==i||j==0) trojkatNaWatkach[i][j].value=1;
+        }
+  }
+  UzupelnijTrojkatPascalaNaWatkach();
 
 }
 
-
-//----------------------------------------------------------------------
-DWORD WINAPI Producent(LPVOID)
-{
-        while(1)
-        {
-                Sleep((rand()%10)*100 + 100);
-                WaitForSingleObject(theMiejsca,INFINITE);
-                WaitForSingleObject(theMiejsca,INFINITE);
-                bufor[we_indeks] = 1;
-                we_indeks = (we_indeks + 1) % N;
-                ReleaseSemaphore(theElementy,1,NULL);
-                RedrawWindow(hwndApp,NULL,NULL,RDW_INTERNALPAINT);
-        };
- return 0;
-};
-DWORD WINAPI Konsument(LPVOID)
-{
-        while(1)
-        {
-                Sleep((rand()%10)*150 + 100);
-                WaitForSingleObject(theElementy,INFINITE);
-                bufor[wy_indeks] = 0;
-                wy_indeks = (wy_indeks + 1) % N;
-                ReleaseSemaphore(theMiejsca,1,NULL);
-                RedrawWindow(hwndApp,NULL,NULL,RDW_INTERNALPAINT);
-        };
- return 0;
-};
 //----------------------------------------------------------------------
 void DrawWindow()
 {
@@ -123,10 +158,9 @@ LONG CALLBACK AppWndProc(HWND hwnd,UINT msg,WPARAM wParam,LPARAM lParam)
   {
   case WM_COMMAND:
       if(LOWORD(wParam)==dwo) {
-            std::cout<<"no";
+            Clear();
             LPSTR jakisText;
             GetWindowText(hwndButton,jakisText,3);
-            N = 5;
             OurFunction();
       }
     break;
@@ -134,22 +168,16 @@ case WM_KILLFOCUS:
 break;
 case WM_SETFOCUS:
 break;
-        case WM_CLOSE:
-PostQuitMessage(0);
-              break;
+case WM_CLOSE:
+    PostQuitMessage(0);
+break;
 case WM_PAINT:
     if(!nieidzdalej) {
                 DrawWindow();
     }
 break;
 case WM_DESTROY:
-                CloseHandle(theElementy);
-                CloseHandle(theMiejsca);
-                TerminateThread(theProducent,0);
-                TerminateThread(theKonsument,0);
-                CloseHandle(theProducent);
-                CloseHandle(theKonsument);
-                if (bufor) delete[] bufor;
+    Clear();
 break;
   };
   return DefWindowProc(hwnd,msg,wParam,lParam);
@@ -238,35 +266,4 @@ int PASCAL WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR szCmdLine, int sw)
   return msg.wParam;
 }
 
-void OurFunction() {
-  nieidzdalej = true;
-  // Tworzymy bufor.
-  bufor = new char[N];
-  for(int i = 0;i < N;i++) bufor[i] = 0;
-  // Tworzymy semafory.
-  theElementy   = CreateSemaphore(NULL,0,N,NULL);
-  theMiejsca    = CreateSemaphore(NULL,N,N,NULL);
-  // Tworzymy watki.
-  DWORD ID;
-  theProducent  = CreateThread(NULL,0,Producent,0,0,&ID);
-  theKonsument  = CreateThread(NULL,0,Konsument,0,0,&ID);
-  // Inicjacja generatora losowego.
-  time_t t;
-  srand((unsigned) time(&t));
-
-  trojkat = new int* [N];
-  for (int i=0;i<N;i++){
-        trojkat[i]=new int[i+1];
-        for(int j=0;j<i;j++){
-            if(j==0||j==i-1) trojkat[i][j]=1;
-        }
-  }
-
-  UzupelnijTrojkatPascala();
-
-  if(N>1) {
-    StworzSemafor();
-  }
-
-}
 
