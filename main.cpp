@@ -5,16 +5,18 @@
 
 #define sto  (100)
 #define dwo (200)
+#define tro (300)
 
-void OurFunction();
+void ObliczTrojkatNaWatkach();
 DWORD WINAPI LiczenieNaWatkach(LPVOID);
 
 static bool nieidzdalej=true;
 static HINSTANCE        hInstApp;
 static HWND             hwndApp;
+static HWND             hwndEditField;
 static HWND             hwndButton;
 static HWND             hwndButton2;
-char   szAppName[]="Problem producenta - konsumenta.";
+char   szAppName[]="Trojkat Pascala";
 static HANDLE           theElementy;
 static HANDLE           theMiejsca;
 static HANDLE           Semafor;
@@ -23,7 +25,7 @@ static HANDLE           theKonsument;
 static HANDLE*         tablicaWatkow;
 static int              we_indeks       = 0;
 static int              wy_indeks       = 0;
-static int              N               = 20;
+static int              N               = 10;
 static char*            bufor           = NULL;
 static int**            trojkat;
 static int*             Argument1;
@@ -32,7 +34,7 @@ struct Index{
     public:
         int i;
         int j;
-        int value=-1;
+        long long value=-1;
 
         Index(){
             this->i=0;
@@ -50,6 +52,7 @@ static HANDLE**           trojkatWatkow;
 
 static HANDLE           watekPrintu;
 
+
 void Clear(){
     if(trojkatWatkow!=NULL && trojkatSemaforow!=NULL){
         for(int i=0;i<N;i++){
@@ -63,6 +66,8 @@ void Clear(){
     TerminateThread(watekPrintu,0);
     CloseHandle(watekPrintu);
 }
+clock_t start;
+clock_t start2;
 
 DWORD WINAPI PrintTrojkat(LPVOID o){
     int suma=0;
@@ -71,22 +76,27 @@ DWORD WINAPI PrintTrojkat(LPVOID o){
                 suma++;
             }
     }
-    WaitForMultipleObjects(suma,*trojkatSemaforow,true,500);
-    for(int i=0;i<N;i++){
+    WaitForMultipleObjects(N*N,*trojkatSemaforow,true,INFINITE);
+    std:: cout << "Watki: " << ((double)(clock() - start)/CLOCKS_PER_SEC) << '\n';
+    /*for(int i=0;i<N;i++){
         for(int j=0;j<=i;j++){
             std::cout<<trojkatNaWatkach[i][j].value<<' ';
         }
         std::cout<<'\n';
-    }
+    }*/
 }
+
 
 void UzupelnijTrojkatPascalaNaWatkach(){
   watekPrintu = CreateThread(NULL,0,PrintTrojkat,NULL,0, NULL);
+
+  start = clock();
+
   for (int i=0;i<N;i++){
         for(int j=0;j<=i;j++){
             trojkatSemaforow[i][j] = CreateSemaphore(NULL,0,2,NULL);
             if(i==0||j==i||j==0) ReleaseSemaphore(trojkatSemaforow[i][j],2,NULL);
-            else trojkatWatkow[i][j]=CreateThread(NULL,0,LiczenieNaWatkach,&trojkatNaWatkach[i][j],0, NULL);
+            else trojkatWatkow[i][j]=CreateThread(NULL,2,LiczenieNaWatkach,&trojkatNaWatkach[i][j],0, NULL);
         }
   }
 }
@@ -101,7 +111,7 @@ DWORD WINAPI LiczenieNaWatkach(LPVOID o) {
     ReleaseSemaphore(trojkatSemaforow[ind->i][ind->j],2,NULL);
 }
 
-void OurFunction() {
+void ObliczTrojkatNaWatkach() {
   nieidzdalej = true;
   trojkatNaWatkach = new Index* [N];
   trojkatSemaforow = new HANDLE* [N];
@@ -118,6 +128,35 @@ void OurFunction() {
   }
   UzupelnijTrojkatPascalaNaWatkach();
 
+}
+
+void ObliczTrojkatIteracyjnie() {
+    Index **trojkatPascala = new Index *[N];
+    start2 = clock();
+    for (int i=0;i<N;i++)
+    {
+        trojkatPascala[i]=new Index [i+1];
+
+        for (int j=0; j<=i; j++) {
+            trojkatPascala[i][j].i=i;
+            trojkatPascala[i][j].j=i;
+            if(i<2 || j==0 || j==i){
+                trojkatPascala[i][j].value=1;
+            }
+            else{
+                trojkatPascala[i][j].value=trojkatPascala[i-1][j-1].value+trojkatPascala[i-1][j].value;
+            }
+        }
+    }
+    std::cout << "Iteracyjnie: " << ((double)(clock() - start2)/CLOCKS_PER_SEC) << '\n';
+
+    /*for (int j=0;j<N;j++)
+    {
+        for(int i=0;i<=j;i++) {
+            std::cout << trojkatPascala[j][i].value << " ";
+        }
+        std::cout << "\n";
+    }*/
 }
 
 //----------------------------------------------------------------------
@@ -152,16 +191,28 @@ void DrawWindow()
         DeleteObject((HBRUSH)theBlueBrush);
         ReleaseDC(hwndApp,theDC);
 };
+
+
 LONG CALLBACK AppWndProc(HWND hwnd,UINT msg,WPARAM wParam,LPARAM lParam)
 {
   switch (msg)
   {
   case WM_COMMAND:
+      LPSTR jakisText;
       if(LOWORD(wParam)==dwo) {
             Clear();
-            LPSTR jakisText;
-            GetWindowText(hwndButton,jakisText,3);
-            OurFunction();
+            GetWindowText(hwndEditField,jakisText,10);
+            char * tekst = jakisText;
+            N = atoi(tekst);
+            if(N<=0) N=0;
+            ObliczTrojkatNaWatkach();
+      }
+      if(LOWORD(wParam)==tro) {
+            GetWindowText(hwndEditField,jakisText,10);
+            char * tekst = jakisText;
+            N = atoi(tekst);
+            if(N<=0) N=0;
+            ObliczTrojkatIteracyjnie();
       }
     break;
 case WM_KILLFOCUS:
@@ -209,10 +260,10 @@ BOOL AppInit(HINSTANCE hInst,HINSTANCE hPrev,int sw,LPSTR szCmdLine)
                   szAppName,szAppName,
   WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX,
   ((rek.right - rek.left) - 320)/2,((rek.bottom - rek.top) - 160)/2,
-  640,320,0,0,hInst,0);
+  300,100,0,0,hInst,0);
   ShowWindow(hwndApp,SW_SHOW);
 
-    hwndButton = CreateWindow(
+    hwndEditField = CreateWindow(
             "EDIT",  // Predefined class; Unicode assumed
             "",      // Button text
             WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,  // Styles
@@ -225,9 +276,9 @@ BOOL AppInit(HINSTANCE hInst,HINSTANCE hPrev,int sw,LPSTR szCmdLine)
             (HINSTANCE)GetWindowLong(hwndApp, GWL_HINSTANCE),
             NULL);      // Pointer not needed.
 
-    hwndButton2 = CreateWindow(
+    hwndButton = CreateWindow(
             "BUTTON",  // Predefined class; Unicode assumed
-            "",      // Button text
+            "Thread",      // Button text
             WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,  // Styles
             110,         // x position
             10,         // y position
@@ -235,6 +286,18 @@ BOOL AppInit(HINSTANCE hInst,HINSTANCE hPrev,int sw,LPSTR szCmdLine)
             20,        // Button height
             hwndApp,     // Parent window
             (HMENU)dwo,       // No menu.
+            (HINSTANCE)GetWindowLong(hwndApp, GWL_HINSTANCE),
+            NULL);      // Pointer not needed.
+    hwndButton2 = CreateWindow(
+            "BUTTON",  // Predefined class; Unicode assumed
+            "Iteration",      // Button text
+            WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,  // Styles
+            110,         // x position
+            30,         // y position
+            100,        // Button width
+            20,        // Button height
+            hwndApp,     // Parent window
+            (HMENU)tro,       // No menu.
             (HINSTANCE)GetWindowLong(hwndApp, GWL_HINSTANCE),
             NULL);      // Pointer not needed.
 
