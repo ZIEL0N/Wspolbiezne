@@ -24,11 +24,12 @@
 
 1511781662 d:\marcin\dokumenty\studia\wspó³bie¿ne\trunk\czytelnicy i pisarze\include\monitorczytelnia.h
 
-1511786030 source:d:\marcin\dokumenty\studia\wspó³bie¿ne\trunk\czytelnicy i pisarze\src\monitorczytelnia.cpp
+1511811175 source:d:\marcin\dokumenty\studia\wspó³bie¿ne\trunk\czytelnicy i pisarze\src\monitorczytelnia.cpp
 	"MonitorCzytelnia.h"
 	<iostream>
 	<thread>
 	<mutex>
 	<chrono>
 	<time.h>
+	<cstdlib>
 

@@ -86,8 +86,8 @@ int main()
     semaforIndex = CreateSemaphore(NULL,1,1,NULL);
     Semafor1 = CreateSemaphore(NULL,1,1,NULL);
     Semafor2 = CreateSemaphore(NULL,0,1,NULL);
-    Watek1 = CreateThread(NULL,0,WatekNieparzysty,&opcja0,0,NULL);
-    Watek2 = CreateThread(NULL,0,WatekParzysty,&opcja1,0,NULL);
+    Watek1 = CreateThread(NULL,0,WatekNieparzysty,NULL,0,NULL);
+    Watek2 = CreateThread(NULL,0,WatekParzysty,NULL,0,NULL);
     start = clock();
 
     Sleep(1000);
