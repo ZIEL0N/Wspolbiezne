@@ -15,7 +15,7 @@
 	<thread>
 	<mutex>
 
-1511785636 source:d:\marcin\dokumenty\studia\wspó³bie¿ne\trunk\czytelnicy i pisarze\main.cpp
+1511812231 source:d:\marcin\dokumenty\studia\wspó³bie¿ne\trunk\czytelnicy i pisarze\main.cpp
 	<iostream>
 	<windows.h>
 	<time.h>
@@ -24,7 +24,7 @@
 
 1511781662 d:\marcin\dokumenty\studia\wspó³bie¿ne\trunk\czytelnicy i pisarze\include\monitorczytelnia.h
 
-1511811175 source:d:\marcin\dokumenty\studia\wspó³bie¿ne\trunk\czytelnicy i pisarze\src\monitorczytelnia.cpp
+1511812311 source:d:\marcin\dokumenty\studia\wspó³bie¿ne\trunk\czytelnicy i pisarze\src\monitorczytelnia.cpp
 	"MonitorCzytelnia.h"
 	<iostream>
 	<thread>

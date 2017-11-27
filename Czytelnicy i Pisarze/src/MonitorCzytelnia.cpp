@@ -35,7 +35,7 @@ void MonitorCzytelnia::EnterCzytelnik()
         int readIndex = rand()%stanowiskaLength;
         int data = stanowiska[readIndex];
         konsola_mutex.lock();
-        std::cout<<"C "<<std::this_thread::get_id()<<" czyta "<<readIndex<<"\n";
+        std::cout<<"C"<<std::this_thread::get_id()<<"\tczyta\t"<<readIndex<<"\n";
         konsola_mutex.unlock();
         std::this_thread::sleep_for(std::chrono::microseconds(500000));
     }
@@ -52,7 +52,7 @@ void MonitorCzytelnia::WritePisarz()
     pisanie=true;
     stanowiska[currentWriteindex]+=1;
     konsola_mutex.lock();
-    std::cout<<"P "<<std::this_thread::get_id()<<" pisze "<<currentWriteindex<<"\n";
+    std::cout<<"P"<<std::this_thread::get_id()<<"\tpisze\t"<<currentWriteindex<<"\n";
     for(int i=0;i<stanowiskaLength;i++){
         std::cout<<stanowiska[i]<<" ";
     }

@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include "MonitorCzytelnia.h"
 
-#define N 3
+#define N 30
 
 
 using namespace std;
