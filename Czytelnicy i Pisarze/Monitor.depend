@@ -1,0 +1,34 @@
+# depslib dependency file v1.0
+1510238829 source:d:\cbprojects\monitor\main.cpp
+	<iostream>
+	<windows.h>
+	<time.h>
+	<stdio.h>
+	"Monitor.h"
+
+1509962167 d:\cbprojects\monitor\include\monitor.h
+
+1510238552 source:d:\cbprojects\monitor\src\monitor.cpp
+	"Monitor.h"
+	<iostream>
+	<chrono>
+	<thread>
+	<mutex>
+
+1511785636 source:d:\marcin\dokumenty\studia\wspó³bie¿ne\trunk\czytelnicy i pisarze\main.cpp
+	<iostream>
+	<windows.h>
+	<time.h>
+	<stdio.h>
+	"MonitorCzytelnia.h"
+
+1511781662 d:\marcin\dokumenty\studia\wspó³bie¿ne\trunk\czytelnicy i pisarze\include\monitorczytelnia.h
+
+1511786030 source:d:\marcin\dokumenty\studia\wspó³bie¿ne\trunk\czytelnicy i pisarze\src\monitorczytelnia.cpp
+	"MonitorCzytelnia.h"
+	<iostream>
+	<thread>
+	<mutex>
+	<chrono>
+	<time.h>
+
