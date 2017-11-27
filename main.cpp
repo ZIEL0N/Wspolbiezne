@@ -96,7 +96,7 @@ int main()
 
     cout << "Wynik :\n";
     for(int j=0;j<N;j++) {
-        //cout << trojkat[N-1][j] << " ";
+        cout << trojkat[N-1][j] << " ";
     }
     cout << endl;
     TerminateThread(Watek1,0);
@@ -117,7 +117,7 @@ int main()
     cout << "Czas liczenia na 1 watku:" << ((double)(clock() - start)/CLOCKS_PER_SEC) << endl;
     cout << "Wynik :\n";
     for(int j=0;j<N;j++) {
-        //cout << trojkat[N-1][j] << " ";
+        cout << trojkat[N-1][j] << " ";
     }
     return 0;
 }

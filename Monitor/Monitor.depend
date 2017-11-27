@@ -1,0 +1,17 @@
+# depslib dependency file v1.0
+1510238829 source:d:\cbprojects\monitor\main.cpp
+	<iostream>
+	<windows.h>
+	<time.h>
+	<stdio.h>
+	"Monitor.h"
+
+1509962167 d:\cbprojects\monitor\include\monitor.h
+
+1510238552 source:d:\cbprojects\monitor\src\monitor.cpp
+	"Monitor.h"
+	<iostream>
+	<chrono>
+	<thread>
+	<mutex>
+
