@@ -1,0 +1,8 @@
+# depslib dependency file v1.0
+1512049054 source:d:\cbprojects\nadajnik\main.cpp
+	<windows.h>
+	<winsock2.h>
+	<ws2tcpip.h>
+	<stdlib.h>
+	<stdio.h>
+
